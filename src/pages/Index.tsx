@@ -1,12 +1,94 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plane, MapPin, Calendar, MessageSquare, Sparkles, Globe, Users, Star, Zap, Heart, Camera, Compass, TrendingUp, Shield, Clock } from "lucide-react";
+import { Plane, MapPin, Calendar, MessageSquare, Sparkles, Globe, Users, Star, Zap, Heart, Camera, Compass, TrendingUp, Shield, Clock, LogIn } from "lucide-react";
 import { ChatInterface } from "@/components/ChatInterface";
 import { ItineraryCard } from "@/components/ItineraryCard";
-import { useState } from "react";
+import { DestinationCard } from "@/components/DestinationCard";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import londonImg from "@/assets/destinations/london.jpg";
+import parisImg from "@/assets/destinations/paris.jpg";
+import tajMahalImg from "@/assets/destinations/taj-mahal.jpg";
+import newYorkImg from "@/assets/destinations/new-york.jpg";
+import tokyoImg from "@/assets/destinations/tokyo.jpg";
+import egyptImg from "@/assets/destinations/egypt.jpg";
+import dubaiImg from "@/assets/destinations/dubai.jpg";
+import sydneyImg from "@/assets/destinations/sydney.jpg";
 
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const destinations = [
+    {
+      name: "London",
+      location: "United Kingdom",
+      image: londonImg,
+      description: "Explore iconic landmarks like Big Ben, Tower Bridge, and the British Museum"
+    },
+    {
+      name: "Paris",
+      location: "France",
+      image: parisImg,
+      description: "Experience the romance of the Eiffel Tower, Louvre, and charming cafés"
+    },
+    {
+      name: "Taj Mahal",
+      location: "Agra, India",
+      image: tajMahalImg,
+      description: "Marvel at the breathtaking white marble monument to eternal love"
+    },
+    {
+      name: "New York",
+      location: "United States",
+      image: newYorkImg,
+      description: "Discover the Statue of Liberty, Times Square, and endless possibilities"
+    },
+    {
+      name: "Tokyo",
+      location: "Japan",
+      image: tokyoImg,
+      description: "Immerse yourself in the perfect blend of tradition and innovation"
+    },
+    {
+      name: "Pyramids of Giza",
+      location: "Egypt",
+      image: egyptImg,
+      description: "Witness the ancient wonders and mysteries of the pharaohs"
+    },
+    {
+      name: "Dubai",
+      location: "United Arab Emirates",
+      image: dubaiImg,
+      description: "Experience luxury at Burj Khalifa and futuristic architecture"
+    },
+    {
+      name: "Sydney",
+      location: "Australia",
+      image: sydneyImg,
+      description: "Enjoy the Opera House, Harbour Bridge, and stunning beaches"
+    }
+  ];
 
   const stats = [
     { number: "10,000+", label: "Happy Travelers" },
@@ -98,15 +180,49 @@ const Index = () => {
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium">Features</a>
-            <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors font-medium">How It Works</a>
+            <a href="#destinations" className="text-foreground hover:text-primary transition-colors font-medium">Destinations</a>
             <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium">Reviews</a>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Welcome back!</span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="border-travel-coral text-travel-coral hover:bg-travel-coral hover:text-white"
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="border-travel-sky text-travel-sky hover:bg-travel-sky hover:text-white"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Button>
+            )}
             <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:shadow-lg transition-all" onClick={() => setShowChat(true)}>
               Start Planning
             </Button>
           </nav>
-          <Button className="md:hidden bg-gradient-to-r from-travel-coral to-travel-sunset" onClick={() => setShowChat(true)}>
-            Chat Now
-          </Button>
+          <div className="md:hidden flex items-center gap-2">
+            {!user && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate("/auth")}
+              >
+                <LogIn className="h-5 w-5" />
+              </Button>
+            )}
+            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset" onClick={() => setShowChat(true)}>
+              Chat Now
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -350,6 +466,47 @@ const Index = () => {
                 </div>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Destinations Section */}
+      <section id="destinations" className="py-24 bg-gradient-to-br from-background via-travel-cream/10 to-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-block">
+              <Badge className="bg-gradient-to-r from-travel-sky to-travel-ocean text-white px-4 py-2 text-sm font-semibold">
+                Explore the World
+              </Badge>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              Explore Hundreds of Places
+              <span className="block bg-gradient-to-r from-travel-sky via-purple-600 to-travel-coral bg-clip-text text-transparent mt-2">
+                From Every Corner of the World
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              From ancient wonders to modern marvels, discover iconic destinations that will take your breath away
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {destinations.map((destination, i) => (
+              <div key={i} className="animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+                <DestinationCard {...destination} />
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl transition-all group"
+              onClick={() => setShowChat(true)}
+            >
+              <Globe className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+              Discover More Destinations
+            </Button>
           </div>
         </div>
       </section>
