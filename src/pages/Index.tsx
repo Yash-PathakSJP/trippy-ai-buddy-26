@@ -5,6 +5,8 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { ItineraryCard } from "@/components/ItineraryCard";
 import { DestinationCard } from "@/components/DestinationCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AnimatedStat } from "@/components/AnimatedStat";
+import { InfiniteMarquee } from "@/components/InfiniteMarquee";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -173,10 +175,10 @@ const Index = () => {
       <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-lg">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-lg animate-neon-pulse">
               <Plane className="h-5 w-5 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent neon-text">Trippy</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Features</a>
@@ -282,7 +284,7 @@ const Index = () => {
             <div className="relative animate-slide-up">
               <div className="absolute -inset-4 bg-gradient-to-r from-travel-sky via-travel-coral to-travel-sunset opacity-20 blur-3xl rounded-full animate-pulse"></div>
               
-              <Card className="p-8 shadow-2xl relative bg-gradient-to-br from-background to-muted/30 border-2">
+              <Card className="p-8 shadow-2xl relative bg-gradient-to-br from-background to-muted/30 border-2 hover:neon-border transition-all duration-500">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 rounded-full bg-gradient-to-br from-travel-coral to-travel-sunset flex items-center justify-center shadow-lg animate-float">
@@ -319,15 +321,23 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Stats Section */}
-          <div className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Infinite Scrolling Image Reel */}
+          <div className="mt-16 -mx-4 md:-mx-8">
+            <InfiniteMarquee 
+              items={destinations.map(d => ({ image: d.image, name: d.name, location: d.location }))}
+              speed={40}
+            />
+          </div>
+
+          {/* Stats Section with Animated Counters */}
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
-              <div key={i} className="text-center animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-muted-foreground font-medium">{stat.label}</div>
-              </div>
+              <AnimatedStat 
+                key={i} 
+                value={stat.number} 
+                label={stat.label}
+                delay={i * 200}
+              />
             ))}
           </div>
         </div>

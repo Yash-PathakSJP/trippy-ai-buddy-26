@@ -102,3 +102,60 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Infinite marquee animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee linear infinite;
+}
+
+/* Neon glow effects */
+.neon-text {
+  text-shadow: 
+    0 0 5px hsl(var(--travel-sky) / 0.5),
+    0 0 10px hsl(var(--travel-sky) / 0.3),
+    0 0 20px hsl(var(--travel-sky) / 0.2);
+}
+
+.neon-border {
+  box-shadow: 
+    inset 0 0 10px hsl(var(--travel-sky) / 0.5),
+    0 0 10px hsl(var(--travel-sky) / 0.3),
+    0 0 20px hsl(var(--travel-sky) / 0.2),
+    0 0 40px hsl(var(--travel-sky) / 0.1);
+}
+
+.neon-glow {
+  box-shadow: 
+    0 0 5px hsl(var(--travel-coral) / 0.5),
+    0 0 10px hsl(var(--travel-coral) / 0.3),
+    0 0 20px hsl(var(--travel-coral) / 0.2);
+}
+
+/* Pulse neon animation */
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 5px hsl(var(--travel-sky) / 0.5),
+      0 0 10px hsl(var(--travel-sky) / 0.3),
+      0 0 20px hsl(var(--travel-sky) / 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 10px hsl(var(--travel-sky) / 0.7),
+      0 0 20px hsl(var(--travel-sky) / 0.5),
+      0 0 40px hsl(var(--travel-sky) / 0.3);
+  }
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
