@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plane, MapPin, Calendar, MessageSquare, Sparkles, Globe, Users, Star, Zap, Heart, Camera, Compass, TrendingUp, Shield, Clock, LogIn } from "lucide-react";
+import { Plane, MapPin, Calendar, MessageSquare, Sparkles, Globe, Users, Star, Zap, Heart, Camera, Compass, TrendingUp, Shield, Clock, LogIn, Mail, Phone, Send, Instagram, Twitter, Facebook, Linkedin, Youtube, ArrowRight } from "lucide-react";
 import { ChatInterface } from "@/components/ChatInterface";
 import { ItineraryCard } from "@/components/ItineraryCard";
 import { DestinationCard } from "@/components/DestinationCard";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +16,6 @@ import tokyoImg from "@/assets/destinations/tokyo.jpg";
 import egyptImg from "@/assets/destinations/egypt.jpg";
 import dubaiImg from "@/assets/destinations/dubai.jpg";
 import sydneyImg from "@/assets/destinations/sydney.jpg";
-
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -140,23 +140,23 @@ const Index = () => {
     {
       name: "Sarah Chen",
       location: "San Francisco, USA",
-      text: "Trippy made planning my 3-week European adventure so easy! The AI knew exactly what I wanted before I even finished asking. Absolutely magical! ✨",
+      text: "Trippy made planning my 3-week European adventure so easy! The AI knew exactly what I wanted before I even finished asking. Absolutely magical!",
       rating: 5,
-      avatar: "🌸"
+      initials: "SC"
     },
     {
       name: "Marco Rodriguez",
       location: "Barcelona, Spain",
       text: "I've used many travel planners, but Trippy is different. It feels like having a knowledgeable friend who genuinely cares about your experience.",
       rating: 5,
-      avatar: "🎨"
+      initials: "MR"
     },
     {
       name: "Yuki Tanaka",
       location: "Tokyo, Japan",
-      text: "The multilingual support is incredible! Trippy helped me plan a trip to Italy even though I only speak Japanese. Game changer! 🎌",
+      text: "The multilingual support is incredible! Trippy helped me plan a trip to Italy even though I only speak Japanese. Game changer!",
       rating: 5,
-      avatar: "🌸"
+      initials: "YT"
     }
   ];
 
@@ -179,9 +179,10 @@ const Index = () => {
             <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium">Features</a>
-            <a href="#destinations" className="text-foreground hover:text-primary transition-colors font-medium">Destinations</a>
-            <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium">Reviews</a>
+            <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Features</a>
+            <a href="#destinations" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Destinations</a>
+            <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Reviews</a>
+            <ThemeToggle />
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">Welcome back!</span>
@@ -189,7 +190,7 @@ const Index = () => {
                   variant="outline" 
                   size="sm"
                   onClick={handleLogout}
-                  className="border-travel-coral text-travel-coral hover:bg-travel-coral hover:text-white"
+                  className="border-travel-coral text-travel-coral hover:bg-travel-coral hover:text-white transition-all duration-300"
                 >
                   Logout
                 </Button>
@@ -199,17 +200,18 @@ const Index = () => {
                 variant="outline" 
                 size="sm"
                 onClick={() => navigate("/auth")}
-                className="border-travel-sky text-travel-sky hover:bg-travel-sky hover:text-white"
+                className="border-travel-sky text-travel-sky hover:bg-travel-sky hover:text-white transition-all duration-300"
               >
                 <LogIn className="mr-2 h-4 w-4" />
                 Login
               </Button>
             )}
-            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:shadow-lg transition-all" onClick={() => setShowChat(true)}>
+            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:shadow-lg hover:scale-105 transition-all duration-300" onClick={() => setShowChat(true)}>
               Start Planning
             </Button>
           </nav>
           <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
             {!user && (
               <Button 
                 variant="ghost" 
@@ -219,7 +221,7 @@ const Index = () => {
                 <LogIn className="h-5 w-5" />
               </Button>
             )}
-            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset" onClick={() => setShowChat(true)}>
+            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:scale-105 transition-all duration-300" onClick={() => setShowChat(true)}>
               Chat Now
             </Button>
           </div>
@@ -246,16 +248,16 @@ const Index = () => {
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-                Meet <span className="font-handwriting text-3xl text-travel-coral">Trippy</span> - your cheerful companion who turns travel planning from overwhelming to absolutely delightful! ✨
+                Meet <span className="font-handwriting text-3xl text-travel-coral">Trippy</span> - your cheerful companion who turns travel planning from overwhelming to absolutely delightful!
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="text-lg bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl transition-all group" onClick={() => setShowChat(true)}>
-                  <MessageSquare className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                <Button size="lg" className="text-lg bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl hover:scale-105 transition-all duration-300 group" onClick={() => setShowChat(true)}>
+                  <MessageSquare className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
                   Chat with Trippy
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg border-2 hover:bg-muted group">
-                  <Sparkles className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                <Button size="lg" variant="outline" className="text-lg border-2 hover:bg-muted hover:scale-105 transition-all duration-300 group">
+                  <Sparkles className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                   Watch Demo
                 </Button>
               </div>
@@ -287,7 +289,7 @@ const Index = () => {
                       <Plane className="h-8 w-8 text-white" />
                     </div>
                     <div>
-                      <p className="font-bold text-xl text-foreground">Hi! I'm Trippy 👋</p>
+                      <p className="font-bold text-xl text-foreground">Hi! I'm Trippy</p>
                       <p className="text-muted-foreground">Your friendly travel companion</p>
                     </div>
                   </div>
@@ -295,11 +297,11 @@ const Index = () => {
                   <div className="bg-gradient-to-br from-travel-sky/10 to-travel-ocean/10 rounded-xl p-5 border border-travel-sky/20 space-y-3">
                     <p className="font-medium text-foreground">Where shall we explore next?</p>
                     <div className="flex gap-2 flex-wrap">
-                      <span className="bg-gradient-to-r from-travel-sky to-travel-ocean text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">🗼 Paris</span>
-                      <span className="bg-gradient-to-r from-travel-coral to-travel-sunset text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">🗾 Tokyo</span>
-                      <span className="bg-gradient-to-r from-green-400 to-travel-sky text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">🏝️ Bali</span>
+                      <span className="bg-gradient-to-r from-travel-sky to-travel-ocean text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:scale-105 transition-transform cursor-pointer">Paris</span>
+                      <span className="bg-gradient-to-r from-travel-coral to-travel-sunset text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:scale-105 transition-transform cursor-pointer">Tokyo</span>
+                      <span className="bg-gradient-to-r from-green-400 to-travel-sky text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:scale-105 transition-transform cursor-pointer">Bali</span>
                     </div>
-                    <p className="text-sm text-muted-foreground italic">✨ Or tell me your dream destination!</p>
+                    <p className="text-sm text-muted-foreground italic">Or tell me your dream destination!</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -355,12 +357,13 @@ const Index = () => {
             {features.map((feature, i) => (
               <Card 
                 key={i} 
-                className="p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group border-2 hover:border-travel-sky/50"
+                className="p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 group border-2 hover:border-travel-sky/50 animate-fade-in"
+                style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
                   <feature.icon className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-foreground group-hover:text-travel-sky transition-colors">{feature.title}</h3>
+                <h3 className="text-xl font-bold mb-3 text-foreground group-hover:text-travel-sky transition-colors duration-300">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </Card>
             ))}
@@ -385,8 +388,8 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
             {howItWorks.map((step, i) => (
-              <div key={i} className="relative">
-                <div className="bg-gradient-to-br from-background to-muted border-2 border-dashed border-travel-sky/30 rounded-2xl p-6 hover:shadow-xl transition-all hover:-translate-y-1">
+              <div key={i} className="relative animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
+                <div className="bg-gradient-to-br from-background to-muted border-2 border-dashed border-travel-sky/30 rounded-2xl p-6 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover:border-travel-sky/60">
                   <div className="h-12 w-12 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center text-2xl font-bold text-white mb-4 shadow-lg">
                     {step.step}
                   </div>
@@ -394,8 +397,8 @@ const Index = () => {
                   <p className="text-muted-foreground">{step.description}</p>
                 </div>
                 {i < howItWorks.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <Compass className="h-8 w-8 text-travel-sky/30" />
+                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 animate-pulse">
+                    <ArrowRight className="h-8 w-8 text-travel-sky/50" />
                   </div>
                 )}
               </div>
@@ -448,7 +451,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, i) => (
-              <Card key={i} className="p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-gradient-to-br from-background to-muted/30">
+              <Card key={i} className="p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 bg-gradient-to-br from-background to-muted/30 animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -456,8 +459,8 @@ const Index = () => {
                 </div>
                 <p className="text-foreground mb-6 leading-relaxed italic">"{testimonial.text}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center text-2xl">
-                    {testimonial.avatar}
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center text-sm font-bold text-white">
+                    {testimonial.initials}
                   </div>
                   <div>
                     <p className="font-bold text-foreground">{testimonial.name}</p>
@@ -492,7 +495,7 @@ const Index = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {destinations.map((destination, i) => (
-              <div key={i} className="animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+              <div key={i} className="animate-fade-in hover:scale-105 transition-transform duration-500" style={{ animationDelay: `${i * 100}ms` }}>
                 <DestinationCard {...destination} />
               </div>
             ))}
@@ -501,10 +504,10 @@ const Index = () => {
           <div className="text-center mt-12">
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl transition-all group"
+              className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl hover:scale-105 transition-all duration-300 group"
               onClick={() => setShowChat(true)}
             >
-              <Globe className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+              <Globe className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
               Discover More Destinations
             </Button>
           </div>
@@ -526,12 +529,12 @@ const Index = () => {
                 Ready to Start Your Adventure?
               </h2>
               <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
-                Let Trippy transform your travel dreams into reality. Your perfect itinerary is just a conversation away! 
+                Let Trippy transform your travel dreams into reality. Your perfect itinerary is just a conversation away!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg" 
-                  className="text-lg bg-white text-travel-sky hover:bg-gray-100 hover:scale-105 transition-all shadow-xl font-semibold"
+                  className="text-lg bg-white text-travel-sky hover:bg-gray-100 hover:scale-105 transition-all duration-300 shadow-xl font-semibold"
                   onClick={() => setShowChat(true)}
                 >
                   <MessageSquare className="mr-2 h-5 w-5" />
@@ -540,7 +543,7 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="text-lg border-2 border-white text-white hover:bg-white/10 font-semibold"
+                  className="text-lg border-2 border-white text-white hover:bg-white/10 hover:scale-105 transition-all duration-300 font-semibold"
                 >
                   <Globe className="mr-2 h-5 w-5" />
                   Watch 2-Min Demo
@@ -552,52 +555,136 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-gradient-to-b from-muted/30 to-muted/60 py-12">
+      <footer className="border-t border-border bg-gradient-to-b from-muted/30 via-muted/50 to-muted py-16">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center">
-                  <Plane className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
+          {/* Newsletter Section */}
+          <div className="bg-gradient-to-r from-travel-sky/10 to-travel-ocean/10 rounded-2xl p-8 md:p-12 mb-16 border border-travel-sky/20">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Stay Updated with Travel Tips</h3>
+                <p className="text-muted-foreground">Get exclusive destination guides, travel deals, and insider tips delivered to your inbox.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Your cheerful AI travel companion, making every journey unforgettable.</p>
+              <div className="flex gap-3">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-travel-sky/50 transition-all"
+                />
+                <Button className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-lg hover:scale-105 transition-all duration-300 px-6">
+                  <Send className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Footer Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+            {/* Brand Column */}
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-lg">
+                  <Plane className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
+              </div>
+              <p className="text-muted-foreground mb-6 leading-relaxed">Your cheerful AI travel companion, making every journey unforgettable. Plan smarter, travel better.</p>
+              
+              {/* Social Links */}
+              <div className="flex gap-3">
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-travel-sky/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                  <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-travel-sky transition-colors" />
+                </a>
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-travel-coral/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                  <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-travel-coral transition-colors" />
+                </a>
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-blue-500/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                  <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                </a>
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-blue-600/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                  <Linkedin className="h-5 w-5 text-muted-foreground group-hover:text-blue-600 transition-colors" />
+                </a>
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-red-500/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                  <Youtube className="h-5 w-5 text-muted-foreground group-hover:text-red-500 transition-colors" />
+                </a>
+              </div>
             </div>
             
+            {/* Features Column */}
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Features</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-travel-sky transition-colors">AI Chat</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Smart Itineraries</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Expense Tracking</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Group Planning</a></li>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300 flex items-center gap-2"><MessageSquare className="h-4 w-4" /> AI Chat</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300 flex items-center gap-2"><Calendar className="h-4 w-4" /> Smart Itineraries</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300 flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Expense Tracking</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300 flex items-center gap-2"><Users className="h-4 w-4" /> Group Planning</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300 flex items-center gap-2"><Globe className="h-4 w-4" /> Multilingual</a></li>
               </ul>
             </div>
             
+            {/* Destinations Column */}
+            <div>
+              <h4 className="font-semibold mb-4 text-foreground">Top Destinations</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Paris, France</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Tokyo, Japan</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">New York, USA</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">London, UK</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Dubai, UAE</a></li>
+              </ul>
+            </div>
+            
+            {/* Company Column */}
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-travel-sky transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Contact</a></li>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">About Us</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Blog</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Careers</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Press Kit</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Partners</a></li>
               </ul>
             </div>
             
+            {/* Support Column */}
             <div>
-              <h4 className="font-semibold mb-4 text-foreground">Connect</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">Facebook</a></li>
-                <li><a href="#" className="hover:text-travel-sky transition-colors">LinkedIn</a></li>
+              <h4 className="font-semibold mb-4 text-foreground">Support</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Help Center</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Contact Us</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Cookie Policy</a></li>
               </ul>
             </div>
           </div>
+
+          {/* Contact Info Bar */}
+          <div className="border-t border-b border-border py-6 mb-8">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 text-sm text-muted-foreground">
+              <a href="mailto:hello@trippy.ai" className="flex items-center gap-2 hover:text-travel-sky transition-colors duration-300">
+                <Mail className="h-4 w-4" />
+                hello@trippy.ai
+              </a>
+              <a href="tel:+1234567890" className="flex items-center gap-2 hover:text-travel-sky transition-colors duration-300">
+                <Phone className="h-4 w-4" />
+                +1 (234) 567-890
+              </a>
+              <span className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                San Francisco, CA
+              </span>
+            </div>
+          </div>
           
-          <div className="border-t border-border pt-8 text-center">
-            <p className="text-muted-foreground">© 2024 Trippy AI Travel Companion. Making travel planning fun, easy, and absolutely delightful! ✨🌍</p>
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <p>© 2024 Trippy AI Travel Companion. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <a href="#" className="hover:text-travel-sky transition-colors duration-300">Privacy</a>
+              <a href="#" className="hover:text-travel-sky transition-colors duration-300">Terms</a>
+              <a href="#" className="hover:text-travel-sky transition-colors duration-300">Cookies</a>
+              <a href="#" className="hover:text-travel-sky transition-colors duration-300">Sitemap</a>
+            </div>
           </div>
         </div>
       </footer>
