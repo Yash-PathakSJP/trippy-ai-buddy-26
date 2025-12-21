@@ -18,6 +18,21 @@ import tokyoImg from "@/assets/destinations/tokyo.jpg";
 import egyptImg from "@/assets/destinations/egypt.jpg";
 import dubaiImg from "@/assets/destinations/dubai.jpg";
 import sydneyImg from "@/assets/destinations/sydney.jpg";
+import romeImg from "@/assets/destinations/rome.jpg";
+import santoriniImg from "@/assets/destinations/santorini.jpg";
+import machuPicchuImg from "@/assets/destinations/machu-picchu.jpg";
+import baliImg from "@/assets/destinations/bali.jpg";
+import barcelonaImg from "@/assets/destinations/barcelona.jpg";
+import maldivesImg from "@/assets/destinations/maldives.jpg";
+import swissAlpsImg from "@/assets/destinations/swiss-alps.jpg";
+import rioImg from "@/assets/destinations/rio.jpg";
+import singaporeImg from "@/assets/destinations/singapore.jpg";
+import veniceImg from "@/assets/destinations/venice.jpg";
+import capeTownImg from "@/assets/destinations/cape-town.jpg";
+import icelandImg from "@/assets/destinations/iceland.jpg";
+import petraImg from "@/assets/destinations/petra.jpg";
+import greatWallImg from "@/assets/destinations/great-wall.jpg";
+import amsterdamImg from "@/assets/destinations/amsterdam.jpg";
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -41,55 +56,39 @@ const Index = () => {
     await supabase.auth.signOut();
   };
 
+  // First reel destinations (left to right)
   const destinations = [
-    {
-      name: "London",
-      location: "United Kingdom",
-      image: londonImg,
-      description: "Explore iconic landmarks like Big Ben, Tower Bridge, and the British Museum"
-    },
-    {
-      name: "Paris",
-      location: "France",
-      image: parisImg,
-      description: "Experience the romance of the Eiffel Tower, Louvre, and charming cafés"
-    },
-    {
-      name: "Taj Mahal",
-      location: "Agra, India",
-      image: tajMahalImg,
-      description: "Marvel at the breathtaking white marble monument to eternal love"
-    },
-    {
-      name: "New York",
-      location: "United States",
-      image: newYorkImg,
-      description: "Discover the Statue of Liberty, Times Square, and endless possibilities"
-    },
-    {
-      name: "Tokyo",
-      location: "Japan",
-      image: tokyoImg,
-      description: "Immerse yourself in the perfect blend of tradition and innovation"
-    },
-    {
-      name: "Pyramids of Giza",
-      location: "Egypt",
-      image: egyptImg,
-      description: "Witness the ancient wonders and mysteries of the pharaohs"
-    },
-    {
-      name: "Dubai",
-      location: "United Arab Emirates",
-      image: dubaiImg,
-      description: "Experience luxury at Burj Khalifa and futuristic architecture"
-    },
-    {
-      name: "Sydney",
-      location: "Australia",
-      image: sydneyImg,
-      description: "Enjoy the Opera House, Harbour Bridge, and stunning beaches"
-    }
+    { name: "London", location: "United Kingdom", image: londonImg, description: "Explore iconic landmarks like Big Ben, Tower Bridge, and the British Museum" },
+    { name: "Paris", location: "France", image: parisImg, description: "Experience the romance of the Eiffel Tower, Louvre, and charming cafés" },
+    { name: "Taj Mahal", location: "Agra, India", image: tajMahalImg, description: "Marvel at the breathtaking white marble monument to eternal love" },
+    { name: "New York", location: "United States", image: newYorkImg, description: "Discover the Statue of Liberty, Times Square, and endless possibilities" },
+    { name: "Tokyo", location: "Japan", image: tokyoImg, description: "Immerse yourself in the perfect blend of tradition and innovation" },
+    { name: "Pyramids of Giza", location: "Egypt", image: egyptImg, description: "Witness the ancient wonders and mysteries of the pharaohs" },
+    { name: "Dubai", location: "United Arab Emirates", image: dubaiImg, description: "Experience luxury at Burj Khalifa and futuristic architecture" },
+    { name: "Sydney", location: "Australia", image: sydneyImg, description: "Enjoy the Opera House, Harbour Bridge, and stunning beaches" }
+  ];
+
+  // Second reel destinations (right to left)
+  const destinations2 = [
+    { name: "Rome", location: "Italy", image: romeImg },
+    { name: "Santorini", location: "Greece", image: santoriniImg },
+    { name: "Machu Picchu", location: "Peru", image: machuPicchuImg },
+    { name: "Bali", location: "Indonesia", image: baliImg },
+    { name: "Barcelona", location: "Spain", image: barcelonaImg },
+    { name: "Maldives", location: "Indian Ocean", image: maldivesImg },
+    { name: "Swiss Alps", location: "Switzerland", image: swissAlpsImg },
+    { name: "Rio de Janeiro", location: "Brazil", image: rioImg }
+  ];
+
+  // Third reel destinations (left to right)
+  const destinations3 = [
+    { name: "Singapore", location: "Singapore", image: singaporeImg },
+    { name: "Venice", location: "Italy", image: veniceImg },
+    { name: "Cape Town", location: "South Africa", image: capeTownImg },
+    { name: "Iceland", location: "Nordic", image: icelandImg },
+    { name: "Petra", location: "Jordan", image: petraImg },
+    { name: "Great Wall", location: "China", image: greatWallImg },
+    { name: "Amsterdam", location: "Netherlands", image: amsterdamImg }
   ];
 
   const stats = [
@@ -175,10 +174,10 @@ const Index = () => {
       <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-lg animate-neon-pulse">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-lg">
               <Plane className="h-5 w-5 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent neon-text">Trippy</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Features</a>
@@ -284,7 +283,7 @@ const Index = () => {
             <div className="relative animate-slide-up">
               <div className="absolute -inset-4 bg-gradient-to-r from-travel-sky via-travel-coral to-travel-sunset opacity-20 blur-3xl rounded-full animate-pulse"></div>
               
-              <Card className="p-8 shadow-2xl relative bg-gradient-to-br from-background to-muted/30 border-2 hover:neon-border transition-all duration-500">
+              <Card className="p-8 shadow-2xl relative bg-gradient-to-br from-background to-muted/30 border-2 hover:shadow-xl transition-all duration-500">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 rounded-full bg-gradient-to-br from-travel-coral to-travel-sunset flex items-center justify-center shadow-lg animate-float">
@@ -321,11 +320,25 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Infinite Scrolling Image Reel */}
-          <div className="mt-16 -mx-4 md:-mx-8">
+          {/* Infinite Scrolling Image Reels */}
+          <div className="mt-16 -mx-4 md:-mx-8 space-y-4">
+            {/* First reel - Left to Right */}
             <InfiniteMarquee 
               items={destinations.map(d => ({ image: d.image, name: d.name, location: d.location }))}
+              speed={45}
+              direction="left"
+            />
+            {/* Second reel - Right to Left */}
+            <InfiniteMarquee 
+              items={destinations2.map(d => ({ image: d.image, name: d.name, location: d.location }))}
               speed={40}
+              direction="right"
+            />
+            {/* Third reel - Left to Right */}
+            <InfiniteMarquee 
+              items={destinations3.map(d => ({ image: d.image, name: d.name, location: d.location }))}
+              speed={35}
+              direction="left"
             />
           </div>
 
