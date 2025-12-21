@@ -7,6 +7,7 @@ import { DestinationCard } from "@/components/DestinationCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AnimatedStat } from "@/components/AnimatedStat";
 import { InfiniteMarquee } from "@/components/InfiniteMarquee";
+import { HeroChatPreview } from "@/components/HeroChatPreview";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +36,7 @@ import greatWallImg from "@/assets/destinations/great-wall.jpg";
 import amsterdamImg from "@/assets/destinations/amsterdam.jpg";
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
+  const [initialDestination, setInitialDestination] = useState<string | undefined>();
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
@@ -54,6 +56,21 @@ const Index = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleStartChat = (destinationName?: string) => {
+    setInitialDestination(destinationName);
+    setShowChat(true);
+  };
+
+  // Destination images map for modal
+  const destinationImagesMap: Record<string, string> = {
+    'Paris': parisImg,
+    'Tokyo': tokyoImg,
+    'Bali': baliImg,
+    'New York': newYorkImg,
+    'London': londonImg,
+    'Dubai': dubaiImg
   };
 
   // First reel destinations (left to right)
@@ -207,7 +224,7 @@ const Index = () => {
                 Login
               </Button>
             )}
-            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:shadow-lg hover:scale-105 transition-all duration-300" onClick={() => setShowChat(true)}>
+            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:shadow-lg hover:scale-105 transition-all duration-300" onClick={() => handleStartChat()}>
               Start Planning
             </Button>
           </nav>
@@ -222,7 +239,7 @@ const Index = () => {
                 <LogIn className="h-5 w-5" />
               </Button>
             )}
-            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:scale-105 transition-all duration-300" onClick={() => setShowChat(true)}>
+            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:scale-105 transition-all duration-300" onClick={() => handleStartChat()}>
               Chat Now
             </Button>
           </div>
@@ -253,7 +270,7 @@ const Index = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="text-lg bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl hover:scale-105 transition-all duration-300 group" onClick={() => setShowChat(true)}>
+                <Button size="lg" className="text-lg bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl hover:scale-105 transition-all duration-300 group" onClick={() => handleStartChat()}>
                   <MessageSquare className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
                   Chat with Trippy
                 </Button>
@@ -280,44 +297,10 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="relative animate-slide-up">
-              <div className="absolute -inset-4 bg-gradient-to-r from-travel-sky via-travel-coral to-travel-sunset opacity-20 blur-3xl rounded-full animate-pulse"></div>
-              
-              <Card className="p-8 shadow-2xl relative bg-gradient-to-br from-background to-muted/30 border-2 hover:shadow-xl transition-all duration-500">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-travel-coral to-travel-sunset flex items-center justify-center shadow-lg animate-float">
-                      <Plane className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-xl text-foreground">Hi! I'm Trippy</p>
-                      <p className="text-muted-foreground">Your friendly travel companion</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gradient-to-br from-travel-sky/10 to-travel-ocean/10 rounded-xl p-5 border border-travel-sky/20 space-y-3">
-                    <p className="font-medium text-foreground">Where shall we explore next?</p>
-                    <div className="flex gap-2 flex-wrap">
-                      <span className="bg-gradient-to-r from-travel-sky to-travel-ocean text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:scale-105 transition-transform cursor-pointer">Paris</span>
-                      <span className="bg-gradient-to-r from-travel-coral to-travel-sunset text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:scale-105 transition-transform cursor-pointer">Tokyo</span>
-                      <span className="bg-gradient-to-r from-green-400 to-travel-sky text-white px-4 py-2 rounded-full text-sm font-medium shadow-md hover:scale-105 transition-transform cursor-pointer">Bali</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground italic">Or tell me your dream destination!</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-muted rounded-lg p-3 text-center">
-                      <TrendingUp className="h-6 w-6 mx-auto mb-1 text-green-500" />
-                      <p className="text-xs text-muted-foreground">Smart Routes</p>
-                    </div>
-                    <div className="bg-muted rounded-lg p-3 text-center">
-                      <Clock className="h-6 w-6 mx-auto mb-1 text-travel-coral" />
-                      <p className="text-xs text-muted-foreground">Real-time Updates</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <HeroChatPreview 
+              onStartChat={handleStartChat} 
+              destinationImages={destinationImagesMap}
+            />
           </div>
 
           {/* Infinite Scrolling Image Reels */}
@@ -713,7 +696,15 @@ const Index = () => {
       </footer>
 
       {/* Chat Interface Modal */}
-      {showChat && <ChatInterface onClose={() => setShowChat(false)} />}
+      {showChat && (
+        <ChatInterface 
+          onClose={() => {
+            setShowChat(false);
+            setInitialDestination(undefined);
+          }} 
+          initialDestination={initialDestination}
+        />
+      )}
     </div>
   );
 };
