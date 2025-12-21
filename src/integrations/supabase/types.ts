@@ -14,7 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      destinations: {
+        Row: {
+          average_cost: string | null
+          best_time_to_visit: string | null
+          created_at: string
+          description: string | null
+          highlights: string[] | null
+          id: string
+          image_url: string | null
+          location: string
+          name: string
+        }
+        Insert: {
+          average_cost?: string | null
+          best_time_to_visit?: string | null
+          created_at?: string
+          description?: string | null
+          highlights?: string[] | null
+          id?: string
+          image_url?: string | null
+          location: string
+          name: string
+        }
+        Update: {
+          average_cost?: string | null
+          best_time_to_visit?: string | null
+          created_at?: string
+          description?: string | null
+          highlights?: string[] | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_trips: {
+        Row: {
+          created_at: string
+          destination_id: string | null
+          destination_name: string
+          id: string
+          notes: string | null
+          planned_date: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          destination_id?: string | null
+          destination_name: string
+          id?: string
+          notes?: string | null
+          planned_date?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string | null
+          destination_name?: string
+          id?: string
+          notes?: string | null
+          planned_date?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_trips_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
