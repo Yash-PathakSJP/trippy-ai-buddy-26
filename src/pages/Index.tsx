@@ -1,13 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plane, MapPin, Calendar, MessageSquare, Sparkles, Globe, Users, Star, Zap, Heart, Camera, Compass, TrendingUp, Shield, Clock, LogIn, Mail, Phone, Send, Instagram, Twitter, Facebook, Linkedin, Youtube, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Plane, MapPin, Calendar, MessageSquare, Sparkles, Globe, Users, Star, Zap, Heart, Camera, Compass, TrendingUp, Shield, Clock, LogIn, Mail, Phone, Send, Instagram, Twitter, Facebook, Linkedin, Youtube, ArrowRight, Search } from "lucide-react";
 import { ChatInterface } from "@/components/ChatInterface";
 import { ItineraryCard } from "@/components/ItineraryCard";
 import { DestinationCard } from "@/components/DestinationCard";
+import { DestinationModal } from "@/components/DestinationModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AnimatedStat } from "@/components/AnimatedStat";
-import { InfiniteMarquee } from "@/components/InfiniteMarquee";
-import { HeroChatPreview } from "@/components/HeroChatPreview";
+import { SearchBar } from "@/components/SearchBar";
+import { OffersSection } from "@/components/OffersSection";
+import { PackagesSection } from "@/components/PackagesSection";
+import { ReviewsSection } from "@/components/ReviewsSection";
+import { TrendingSection } from "@/components/TrendingSection";
+import { MapSection } from "@/components/MapSection";
+import { GoogleMapComponent } from "@/components/GoogleMapComponent";
+import { useGSAPAnimation } from "@/hooks/use-gsap-animation";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,11 +43,33 @@ import icelandImg from "@/assets/destinations/iceland.jpg";
 import petraImg from "@/assets/destinations/petra.jpg";
 import greatWallImg from "@/assets/destinations/great-wall.jpg";
 import amsterdamImg from "@/assets/destinations/amsterdam.jpg";
+
+interface DestinationType {
+  name: string;
+  location: string;
+  image: string;
+  description?: string;
+}
+
+interface Destination {
+  id: string;
+  name: string;
+  location: string;
+  description: string | null;
+  highlights: string[] | null;
+  best_time_to_visit: string | null;
+  average_cost: string | null;
+  image_url: string | null;
+}
+
 const Index = () => {
   const [showChat, setShowChat] = useState(false);
   const [initialDestination, setInitialDestination] = useState<string | undefined>();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+  const [isDestinationModalOpen, setIsDestinationModalOpen] = useState(false);
   const navigate = useNavigate();
+  const animationRef = useGSAPAnimation();
 
   useEffect(() => {
     // Check if user is logged in
@@ -63,14 +94,23 @@ const Index = () => {
     setShowChat(true);
   };
 
-  // Destination images map for modal
-  const destinationImagesMap: Record<string, string> = {
-    'Paris': parisImg,
-    'Tokyo': tokyoImg,
-    'Bali': baliImg,
-    'New York': newYorkImg,
-    'London': londonImg,
-    'Dubai': dubaiImg
+  const handleDestinationClick = (destination: DestinationType) => {
+    setSelectedDestination({
+      id: destination.name,
+      name: destination.name,
+      location: destination.location,
+      description: destination.description || `Explore the amazing ${destination.name} and discover its unique charm and attractions.`,
+      highlights: null,
+      best_time_to_visit: null,
+      average_cost: null,
+      image_url: destination.image
+    });
+    setIsDestinationModalOpen(true);
+  };
+
+  const handleStartPlanningFromModal = (destination: Destination) => {
+    setIsDestinationModalOpen(false);
+    handleStartChat(`${destination.name}, ${destination.location}`);
   };
 
   // First reel destinations (left to right)
@@ -186,298 +226,393 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-lg">
+    <div className="min-h-screen" ref={animationRef}>
+      {/* Header - Clean & Professional Navigation */}
+      <header className="border-b border-border/40 bg-background/98 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 py-3.5 flex items-center justify-between gap-6">
+          {/* Logo - Prominent & Clickable */}
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2.5 min-w-fit hover:opacity-80 transition-opacity"
+          >
+            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
               <Plane className="h-5 w-5 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
+            <div className="hidden sm:block">
+              <span className="text-xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent block leading-none">Trippy AI</span>
+              <span className="text-[10px] text-muted-foreground font-medium">Your Travel Buddy</span>
+            </div>
+          </button>
+
+          {/* Search Bar - Desktop */}
+          <div className="hidden lg:flex flex-1 max-w-md">
+            <div className="w-full relative group">
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none group-focus-within:text-travel-sky transition-colors" />
+              <Input
+                type="text"
+                placeholder="Search destinations, packages..."
+                className="pl-11 pr-4 py-2.5 rounded-full border border-border/50 bg-muted/20 hover:bg-muted/40 focus:bg-background transition-all text-sm focus:ring-2 focus:ring-travel-sky/30 focus:border-travel-sky/50"
+              />
+            </div>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#features" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Features</a>
-            <a href="#destinations" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Destinations</a>
-            <a href="#testimonials" className="text-foreground hover:text-primary transition-colors font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full">Reviews</a>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-5">
+            <a href="#features" className="text-sm text-foreground/80 hover:text-travel-sky transition-colors font-medium relative group">
+              <span>Features</span>
+              <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-travel-sky transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            <a href="#destinations" className="text-sm text-foreground/80 hover:text-travel-ocean transition-colors font-medium relative group">
+              <span>Destinations</span>
+              <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-travel-ocean transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            <a href="#packages" className="text-sm text-foreground/80 hover:text-travel-coral transition-colors font-medium relative group">
+              <span>Packages</span>
+              <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-travel-coral transition-all duration-300 group-hover:w-full"></span>
+            </a>
+            
+            <div className="h-5 w-px bg-border/50"></div>
+            
             <ThemeToggle />
             {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">Welcome back!</span>
-                <Button 
-                  variant="outline" 
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="border-travel-coral text-travel-coral hover:bg-travel-coral hover:text-white transition-all duration-300"
+                  className="text-xs font-medium"
                 >
                   Logout
                 </Button>
               </div>
             ) : (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => navigate("/auth")}
-                className="border-travel-sky text-travel-sky hover:bg-travel-sky hover:text-white transition-all duration-300"
+                className="text-xs font-medium hover:bg-travel-sky/10 hover:text-travel-sky"
               >
-                <LogIn className="mr-2 h-4 w-4" />
+                <LogIn className="mr-1.5 h-4 w-4" />
                 Login
               </Button>
             )}
-            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:shadow-lg hover:scale-105 transition-all duration-300" onClick={() => handleStartChat()}>
-              Start Planning
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-lg transition-all duration-300 hover:scale-105 text-xs font-medium px-4" 
+              onClick={() => handleStartChat()}
+            >
+              <MessageSquare className="mr-1.5 h-4 w-4" />
+              Start Chat
             </Button>
           </nav>
+          
+          {/* Mobile Navigation */}
           <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
             {!user && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => navigate("/auth")}
+                className="px-2"
               >
                 <LogIn className="h-5 w-5" />
               </Button>
             )}
-            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset hover:scale-105 transition-all duration-300" onClick={() => handleStartChat()}>
+            <Button className="bg-gradient-to-r from-travel-coral to-travel-sunset transition-all duration-300 hover-button" onClick={() => handleStartChat()}>
               Chat Now
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Hero Section - Enhanced */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-travel-cream/30 via-background to-travel-sky/10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwZWE1ZTkiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAxNmMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHptMCAyNGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40"></div>
-        
-        <div className="container mx-auto px-4 py-20 md:py-32 relative">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-fade-in">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-travel-coral to-travel-sunset rounded-full px-4 py-2 text-sm font-semibold text-white shadow-lg">
-                <Sparkles className="h-4 w-4" />
-                <span>Powered by Advanced AI</span>
+      {/* Hero Section - Hackathon Optimized */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-travel-sky/5 to-travel-ocean/10">
+        {/* Video Background */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-20 dark:opacity-15"
+        >
+          <source src="https://video.wixstatic.com/video/3a70c8_3c7fb95ad85f46e2b6461185821989ef/480p/mp4/file.mp4" type="video/mp4" />
+        </video>
+
+        {/* Subtle Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(14,165,233,0.03),transparent_50%),radial-gradient(circle_at_70%_50%,rgba(236,72,153,0.03),transparent_50%)]"></div>
+
+        <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32 relative">
+          <div className="max-w-5xl mx-auto">
+            {/* AI Badge - Prominent for Judges */}
+            <div className="flex justify-center mb-6 animate-fade-in">
+              <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-travel-sky/20 to-travel-ocean/20 border border-travel-sky/30 rounded-full px-5 py-2.5 backdrop-blur-sm shadow-lg">
+                <div className="relative">
+                  <Sparkles className="h-5 w-5 text-travel-sky" />
+                  <div className="absolute inset-0 animate-ping">
+                    <Sparkles className="h-5 w-5 text-travel-sky opacity-20" />
+                  </div>
+                </div>
+                <span className="text-sm font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">
+                  AI-POWERED TRAVEL ASSISTANT
+                </span>
               </div>
-              
-              <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
-                Your Personal
-                <span className="block bg-gradient-to-r from-travel-sky via-travel-ocean to-purple-600 bg-clip-text text-transparent mt-2">
-                  AI Travel Buddy
+            </div>
+
+            {/* Main Headline - Clear & Impactful */}
+            <div className="text-center space-y-6 animate-fade-in">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight">
+                <span className="text-foreground">Your Personal AI</span>
+                <span className="block mt-2 bg-gradient-to-r from-travel-sky via-travel-ocean to-travel-coral bg-clip-text text-transparent">
+                  Travel Planner
                 </span>
               </h1>
-              
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-                Meet <span className="font-handwriting text-3xl text-travel-coral">Trippy</span> - your cheerful companion who turns travel planning from overwhelming to absolutely delightful!
+
+              {/* Value Proposition - Concise & Clear */}
+              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Chat with <span className="font-bold text-travel-coral">Trippy AI</span> to plan your dream vacation in seconds.
+                <span className="hidden sm:inline"> Get personalized itineraries, instant bookings, and real-time trip management—all in one place.</span>
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="text-lg bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl hover:scale-105 transition-all duration-300 group" onClick={() => handleStartChat()}>
-                  <MessageSquare className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
-                  Chat with Trippy
+              {/* Primary CTAs */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+                <Button 
+                  size="lg" 
+                  className="text-base sm:text-lg px-8 py-6 sm:py-7 bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-2xl transition-all duration-300 hover:scale-105 group w-full sm:w-auto"
+                  onClick={() => handleStartChat()}
+                >
+                  <MessageSquare className="mr-2 h-5 w-5 sm:h-6 sm:w-6 group-hover:rotate-12 transition-transform" />
+                  Chat with Trippy AI
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg border-2 hover:bg-muted hover:scale-105 transition-all duration-300 group">
-                  <Sparkles className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-                  Watch Demo
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="text-base sm:text-lg px-8 py-6 sm:py-7 border-2 border-travel-sky text-travel-sky hover:bg-travel-sky hover:text-white transition-all duration-300 w-full sm:w-auto"
+                  onClick={() => navigate('/booking')}
+                >
+                  <Plane className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
+                  Quick Book
                 </Button>
               </div>
 
-              {/* Trust Badges */}
-              <div className="flex items-center gap-6 pt-4">
+              {/* Trust Indicators - Simplified */}
+              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 pt-8 text-sm">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-green-500" />
-                  <span className="text-sm text-muted-foreground">Secure & Private</span>
+                  <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="font-medium text-foreground">100% Secure</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                  <span className="text-sm text-muted-foreground">Instant Results</span>
+                  <div className="h-8 w-8 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <span className="font-medium text-foreground">Instant Planning</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-red-500" />
-                  <span className="text-sm text-muted-foreground">Made with Love</span>
+                  <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="font-medium text-foreground">150+ Countries</span>
                 </div>
               </div>
             </div>
-            
-            <HeroChatPreview 
-              onStartChat={handleStartChat} 
-              destinationImages={destinationImagesMap}
-            />
-          </div>
 
-          {/* Infinite Scrolling Image Reels */}
-          <div className="mt-16 -mx-4 md:-mx-8 space-y-4">
-            {/* First reel - Left to Right */}
-            <InfiniteMarquee 
-              items={destinations.map(d => ({ image: d.image, name: d.name, location: d.location }))}
-              speed={45}
-              direction="left"
-            />
-            {/* Second reel - Right to Left */}
-            <InfiniteMarquee 
-              items={destinations2.map(d => ({ image: d.image, name: d.name, location: d.location }))}
-              speed={40}
-              direction="right"
-            />
-            {/* Third reel - Left to Right */}
-            <InfiniteMarquee 
-              items={destinations3.map(d => ({ image: d.image, name: d.name, location: d.location }))}
-              speed={35}
-              direction="left"
-            />
-          </div>
-
-          {/* Stats Section with Animated Counters */}
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
-              <AnimatedStat 
-                key={i} 
-                value={stat.number} 
-                label={stat.label}
-                delay={i * 200}
-              />
-            ))}
+            {/* Stats Section - Cleaner Layout */}
+            <div className="mt-16 sm:mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+              {stats.map((stat, i) => (
+                <AnimatedStat
+                  key={i}
+                  value={stat.number}
+                  label={stat.label}
+                  delay={i * 200}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section - Enhanced */}
-      <section id="features" className="py-24 bg-gradient-to-b from-background to-muted/20">
+      {/* Search Bar Section - NEW */}
+      <section className="py-12 bg-gradient-to-b from-background to-muted/10 -mt-10 relative z-10">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
-            <div className="inline-block">
-              <Badge className="bg-gradient-to-r from-travel-coral to-travel-sunset text-white px-4 py-2 text-sm font-semibold">
-                Powerful Features
-              </Badge>
+          <SearchBar />
+        </div>
+      </section>
+
+      {/* Trending Section - NEW */}
+      <TrendingSection />
+
+      {/* Offers Section - NEW */}
+      <OffersSection />
+
+      {/* Features Section - Hackathon Ready */}
+      <section id="features" className="py-20 md:py-28 bg-gradient-to-b from-background via-muted/5 to-background">
+        <div className="container mx-auto px-4">
+          {/* Section Header */}
+          <div className="text-center mb-14 md:mb-20 space-y-5 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-travel-sky/10 to-travel-ocean/10 border border-travel-sky/20 rounded-full px-4 py-2 backdrop-blur-sm">
+              <Sparkles className="h-4 w-4 text-travel-sky" />
+              <span className="text-sm font-bold text-travel-sky">AI-POWERED FEATURES</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              Everything You Need for
-              <span className="block bg-gradient-to-r from-travel-coral to-travel-sunset bg-clip-text text-transparent mt-2">
-                The Perfect Journey
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold">
+              <span className="text-foreground">Everything You Need,</span>
+              <span className="block mt-2 bg-gradient-to-r from-travel-sky via-travel-ocean to-travel-coral bg-clip-text text-transparent">
+                Nothing You Don't
               </span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From dreaming to doing, Trippy handles every detail so you can focus on making memories
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Trippy AI combines cutting-edge technology with travel expertise to plan your perfect journey
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Features Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {features.map((feature, i) => (
-              <Card 
-                key={i} 
-                className="p-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 group border-2 hover:border-travel-sky/50 animate-fade-in"
-                style={{ animationDelay: `${i * 100}ms` }}
+              <Card
+                key={i}
+                className="group relative overflow-hidden border-2 hover:border-travel-sky/40 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 bg-gradient-to-br from-background to-muted/20"
               >
-                <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                  <feature.icon className="h-7 w-7 text-white" />
+                {/* Feature Content */}
+                <div className="p-6 sm:p-7 relative z-10">
+                  {/* Icon */}
+                  <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="h-7 w-7 text-white" />
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground group-hover:text-travel-sky transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-foreground group-hover:text-travel-sky transition-colors duration-300">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                
+                {/* Hover Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-travel-sky/0 via-travel-ocean/0 to-travel-sky/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-gradient-to-br from-travel-cream/20 to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              Plan Your Trip in
-              <span className="block bg-gradient-to-r from-travel-sky to-purple-600 bg-clip-text text-transparent mt-2">
-                4 Simple Steps
+      {/* How It Works Section - Visual Journey */}
+      <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-br from-muted/10 via-background to-travel-sky/5 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.02]">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-travel-sky rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-travel-ocean rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-14 md:mb-20 space-y-5">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold">
+              <span className="text-foreground">From Dream to Reality</span>
+              <span className="block mt-2 bg-gradient-to-r from-travel-coral via-travel-sunset to-travel-ocean bg-clip-text text-transparent">
+                In Just 4 Steps
               </span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              It's so easy, you'll wonder why you ever stressed about travel planning!
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Planning a trip has never been this easy. Watch how Trippy AI transforms your travel dreams
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          {/* Steps Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-16 md:mb-24">
             {howItWorks.map((step, i) => (
-              <div key={i} className="relative animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
-                <div className="bg-gradient-to-br from-background to-muted border-2 border-dashed border-travel-sky/30 rounded-2xl p-6 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 hover:border-travel-sky/60">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center text-2xl font-bold text-white mb-4 shadow-lg">
-                    {step.step}
+              <div key={i} className="relative group">
+                {/* Step Card */}
+                <div className="relative bg-gradient-to-br from-background to-muted/30 border-2 border-dashed border-travel-sky/30 rounded-2xl p-6 sm:p-7 hover:border-travel-sky/60 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full">
+                  {/* Step Number */}
+                  <div className="relative mb-5">
+                    <div className="h-14 w-14 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center text-2xl font-bold text-white shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      {step.step}
+                    </div>
+                    {/* Pulse Effect */}
+                    <div className="absolute inset-0 rounded-full bg-travel-sky/20 animate-ping opacity-0 group-hover:opacity-100"></div>
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-foreground">{step.title}</h3>
-                  <p className="text-muted-foreground">{step.description}</p>
+                  
+                  {/* Step Content */}
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 text-foreground group-hover:text-travel-sky transition-colors duration-300">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
                 </div>
+                
+                {/* Arrow Connector - Desktop Only */}
                 {i < howItWorks.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 animate-pulse">
-                    <ArrowRight className="h-8 w-8 text-travel-sky/50" />
+                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20">
+                    <div className="relative">
+                      <ArrowRight className="h-8 w-8 text-travel-sky/40 group-hover:text-travel-sky transition-colors duration-300" />
+                      <ArrowRight className="h-8 w-8 text-travel-sky/20 absolute top-0 left-0 animate-pulse" />
+                    </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-          {/* Sample Itinerary */}
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold mb-4 text-foreground">See Your Trip Come to Life</h3>
-            <p className="text-lg text-muted-foreground">Here's what a Trippy itinerary looks like</p>
+          {/* Sample Itinerary Section */}
+          <div className="mt-16 md:mt-20">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-foreground">See Your Trip Come to Life</h3>
+              <p className="text-base sm:text-lg text-muted-foreground">Here's what a Trippy itinerary looks like</p>
+            </div>
+
+            <div className="max-w-4xl mx-auto space-y-6">
+              <ItineraryCard
+                day={1}
+                title="Arrival in Paris - The City of Lights!"
+                activities={[
+                  { time: "10:00 AM", name: "Hotel Check-in at Le Marais", location: "Le Marais District, Paris" },
+                  { time: "2:00 PM", name: "Eiffel Tower Experience", location: "Champ de Mars, 5 Avenue Anatole" },
+                  { time: "7:00 PM", name: "Romantic Seine River Cruise", location: "Port de la Bourdonnais" }
+                ]}
+              />
+              <ItineraryCard
+                day={2}
+                title="Cultural Immersion Day"
+                activities={[
+                  { time: "9:00 AM", name: "Louvre Museum Tour", location: "Rue de Rivoli, 75001" },
+                  { time: "1:00 PM", name: "French Cuisine at Bistro", location: "Latin Quarter, Rue Mouffetard" },
+                  { time: "4:00 PM", name: "Notre-Dame Cathedral", location: "Île de la Cité, 6 Parvis" }
+                ]}
+              />
+            </div>
           </div>
 
-          <div className="max-w-4xl mx-auto space-y-6">
-            <ItineraryCard
-              day={1}
-              title="Arrival in Paris - The City of Lights!"
-              activities={[
-                { time: "10:00 AM", name: "Hotel Check-in at Le Marais", location: "Le Marais District, Paris" },
-                { time: "2:00 PM", name: "Eiffel Tower Experience", location: "Champ de Mars, 5 Avenue Anatole" },
-                { time: "7:00 PM", name: "Romantic Seine River Cruise", location: "Port de la Bourdonnais" }
-              ]}
-            />
-            <ItineraryCard
-              day={2}
-              title="Cultural Immersion Day"
-              activities={[
-                { time: "9:00 AM", name: "Louvre Museum Tour", location: "Rue de Rivoli, 75001" },
-                { time: "1:00 PM", name: "French Cuisine at Bistro", location: "Latin Quarter, Rue Mouffetard" },
-                { time: "4:00 PM", name: "Notre-Dame Cathedral", location: "Île de la Cité, 6 Parvis" }
-              ]}
-            />
+          {/* CTA Section */}
+          <div className="text-center mt-16">
+            <div className="inline-flex flex-col items-center gap-5 p-8 sm:p-10 bg-gradient-to-br from-travel-sky/10 to-travel-ocean/10 border border-travel-sky/20 rounded-3xl backdrop-blur-sm">
+              <h3 className="text-2xl sm:text-3xl font-bold text-foreground">Ready to Start Your Journey?</h3>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-md">Join thousands of happy travelers who trust Trippy AI</p>
+              <Button 
+                size="lg"
+                className="text-base sm:text-lg px-8 py-6 bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                onClick={() => handleStartChat()}
+              >
+                <MessageSquare className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                Chat with Trippy Now
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 bg-gradient-to-b from-muted/20 to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              Loved by Travelers
-              <span className="block bg-gradient-to-r from-travel-coral via-travel-sunset to-red-500 bg-clip-text text-transparent mt-2">
-                Around the World
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Don't just take our word for it - hear from adventurers who've traveled with Trippy!
-            </p>
-          </div>
+      {/* Packages Section - NEW */}
+      <PackagesSection />
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, i) => (
-              <Card key={i} className="p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 bg-gradient-to-br from-background to-muted/30 animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-foreground mb-6 leading-relaxed italic">"{testimonial.text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-travel-sky to-travel-ocean flex items-center justify-center text-sm font-bold text-white">
-                    {testimonial.initials}
-                  </div>
-                  <div>
-                    <p className="font-bold text-foreground">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.location}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Testimonials Section - Replaced with ReviewsSection */}
+      <div id="testimonials">
+        <ReviewsSection />
+      </div>
 
       {/* Destinations Section */}
       <section id="destinations" className="py-24 bg-gradient-to-br from-background via-travel-cream/10 to-background">
@@ -501,24 +636,33 @@ const Index = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {destinations.map((destination, i) => (
-              <div key={i} className="animate-fade-in hover:scale-105 transition-transform duration-500" style={{ animationDelay: `${i * 100}ms` }}>
-                <DestinationCard {...destination} />
+              <div key={i} className="animate-fade-in">
+                <DestinationCard 
+                  {...destination} 
+                  onClick={() => handleDestinationClick(destination)}
+                />
               </div>
             ))}
           </div>
 
           <div className="text-center mt-12">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-xl transition-all duration-300 group hover-button"
               onClick={() => setShowChat(true)}
             >
-              <Globe className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
+              <Globe className="mr-2 h-5 w-5 hover-icon" />
               Discover More Destinations
             </Button>
           </div>
         </div>
       </section>
+
+      {/* Interactive Map Section */}
+      <MapSection />
+
+      {/* Google Maps Section */}
+      <GoogleMapComponent />
 
       {/* CTA Section */}
       <section className="py-24">
@@ -526,7 +670,7 @@ const Index = () => {
           <Card className="relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-travel-sky via-travel-ocean to-purple-600"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6bTAgMjBjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6TTEyIDM0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDIwYzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-40"></div>
-            
+
             <div className="relative p-12 md:p-16 text-center text-white">
               <div className="inline-block mb-6">
                 <Sparkles className="h-16 w-16 animate-pulse" />
@@ -538,18 +682,18 @@ const Index = () => {
                 Let Trippy transform your travel dreams into reality. Your perfect itinerary is just a conversation away!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="text-lg bg-white text-travel-sky hover:bg-gray-100 hover:scale-105 transition-all duration-300 shadow-xl font-semibold"
+                <Button
+                  size="lg"
+                  className="text-lg bg-white text-travel-sky hover:bg-gray-100 transition-all duration-300 shadow-xl font-semibold hover-button"
                   onClick={() => setShowChat(true)}
                 >
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Start Planning Now - It's Free!
                 </Button>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="outline"
-                  className="text-lg border-2 border-white text-white hover:bg-white/10 hover:scale-105 transition-all duration-300 font-semibold"
+                  className="text-lg border-2 border-white text-white hover:bg-white/10 transition-all duration-300 font-semibold hover-button"
                 >
                   <Globe className="mr-2 h-5 w-5" />
                   Watch 2-Min Demo
@@ -571,12 +715,12 @@ const Index = () => {
                 <p className="text-muted-foreground">Get exclusive destination guides, travel deals, and insider tips delivered to your inbox.</p>
               </div>
               <div className="flex gap-3">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email" 
+                <input
+                  type="email"
+                  placeholder="Enter your email"
                   className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-travel-sky/50 transition-all"
                 />
-                <Button className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-lg hover:scale-105 transition-all duration-300 px-6">
+                <Button className="bg-gradient-to-r from-travel-sky to-travel-ocean hover:shadow-lg transition-all duration-300 px-6 hover-button">
                   <Send className="h-5 w-5" />
                 </Button>
               </div>
@@ -594,27 +738,27 @@ const Index = () => {
                 <span className="text-2xl font-bold bg-gradient-to-r from-travel-sky to-travel-ocean bg-clip-text text-transparent">Trippy</span>
               </div>
               <p className="text-muted-foreground mb-6 leading-relaxed">Your cheerful AI travel companion, making every journey unforgettable. Plan smarter, travel better.</p>
-              
+
               {/* Social Links */}
               <div className="flex gap-3">
-                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-travel-sky/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-travel-sky/20 flex items-center justify-center transition-all duration-300 hover-button">
                   <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-travel-sky transition-colors" />
                 </a>
-                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-travel-coral/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-travel-coral/20 flex items-center justify-center transition-all duration-300 hover-button">
                   <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-travel-coral transition-colors" />
                 </a>
-                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-blue-500/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-blue-500/20 flex items-center justify-center transition-all duration-300 hover-button">
                   <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                 </a>
-                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-blue-600/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-blue-600/20 flex items-center justify-center transition-all duration-300 hover-button">
                   <Linkedin className="h-5 w-5 text-muted-foreground group-hover:text-blue-600 transition-colors" />
                 </a>
-                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-red-500/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                <a href="#" className="h-10 w-10 rounded-full bg-muted hover:bg-red-500/20 flex items-center justify-center transition-all duration-300 hover-button">
                   <Youtube className="h-5 w-5 text-muted-foreground group-hover:text-red-500 transition-colors" />
                 </a>
               </div>
             </div>
-            
+
             {/* Features Column */}
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Features</h4>
@@ -626,7 +770,7 @@ const Index = () => {
                 <li><a href="#" className="hover:text-travel-sky transition-colors duration-300 flex items-center gap-2"><Globe className="h-4 w-4" /> Multilingual</a></li>
               </ul>
             </div>
-            
+
             {/* Destinations Column */}
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Top Destinations</h4>
@@ -638,7 +782,7 @@ const Index = () => {
                 <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Dubai, UAE</a></li>
               </ul>
             </div>
-            
+
             {/* Company Column */}
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Company</h4>
@@ -650,7 +794,7 @@ const Index = () => {
                 <li><a href="#" className="hover:text-travel-sky transition-colors duration-300">Partners</a></li>
               </ul>
             </div>
-            
+
             {/* Support Column */}
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Support</h4>
@@ -675,17 +819,17 @@ const Index = () => {
                 <Phone className="h-4 w-4" />
                 +1 (234) 567-890
               </a>
-              <span className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                San Francisco, CA
-              </span>
+              <div className="flex items-center gap-2">
+                <Heart className="h-5 w-5 text-red-500" />
+                <span className="text-sm text-muted-foreground">Made with Love</span>
+              </div>
             </div>
           </div>
-          
-          {/* Bottom Bar */}
+
+          {/* Bottom Footer */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© 2024 Trippy AI Travel Companion. All rights reserved.</p>
-            <div className="flex items-center gap-6">
+            <p>© {new Date().getFullYear()} Trippy. All rights reserved.</p>
+            <div className="flex gap-4">
               <a href="#" className="hover:text-travel-sky transition-colors duration-300">Privacy</a>
               <a href="#" className="hover:text-travel-sky transition-colors duration-300">Terms</a>
               <a href="#" className="hover:text-travel-sky transition-colors duration-300">Cookies</a>
@@ -697,20 +841,25 @@ const Index = () => {
 
       {/* Chat Interface Modal */}
       {showChat && (
-        <ChatInterface 
+        <ChatInterface
           onClose={() => {
             setShowChat(false);
             setInitialDestination(undefined);
-          }} 
+          }}
           initialDestination={initialDestination}
         />
       )}
+
+      {/* Destination Detail Modal */}
+      <DestinationModal
+        destination={selectedDestination}
+        isOpen={isDestinationModalOpen}
+        onClose={() => setIsDestinationModalOpen(false)}
+        onStartPlanning={handleStartPlanningFromModal}
+        image={selectedDestination?.image_url}
+      />
     </div>
   );
 };
-
-const Badge = ({ className, children }: { className?: string; children: React.ReactNode }) => (
-  <span className={`inline-flex items-center ${className}`}>{children}</span>
-);
 
 export default Index;
