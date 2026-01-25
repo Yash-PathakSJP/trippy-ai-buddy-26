@@ -4,36 +4,80 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0ea5e9" />
-    
+
     <!-- Preconnect for Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
     <!-- Fonts with display=swap for better performance -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
-    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- SEO Meta Tags -->
-    <title>Trippy - AI Travel Companion | Plan Perfect Trips with Smart Itineraries</title>
-    <meta name="description" content="Plan your perfect trip with Trippy, your friendly AI travel companion. Get personalized itineraries, explore famous destinations like Paris, London, Tokyo, and more. Smart recommendations and interactive travel planning." />
+    <title>
+      Trippy - AI Travel Companion | Plan Perfect Trips with Smart Itineraries
+    </title>
+    <meta
+      name="description"
+      content="Plan your perfect trip with Trippy, your friendly AI travel companion. Get personalized itineraries, explore famous destinations like Paris, London, Tokyo, and more. Smart recommendations and interactive travel planning."
+    />
     <meta name="author" content="Trippy" />
-    <meta name="keywords" content="travel planner, AI travel companion, trip planning, itinerary builder, travel destinations, vacation planner, Paris, London, Tokyo, travel app" />
+    <meta
+      name="keywords"
+      content="travel planner, AI travel companion, trip planning, itinerary builder, travel destinations, vacation planner, Paris, London, Tokyo, travel app"
+    />
     <link rel="canonical" href="https://trippy.lovable.app/" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content="Trippy - Your AI Travel Companion" />
-    <meta property="og:description" content="Plan your perfect trip with AI-powered itineraries and smart recommendations. Explore hundreds of destinations worldwide." />
+    <meta
+      property="og:description"
+      content="Plan your perfect trip with AI-powered itineraries and smart recommendations. Explore hundreds of destinations worldwide."
+    />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta
+      property="og:image"
+      content="https://lovable.dev/opengraph-image-p98pqg.png"
+    />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta
+      name="twitter:image"
+      content="https://lovable.dev/opengraph-image-p98pqg.png"
+    />
+
+    <!-- Chatbot styles (localized) -->
+    <link rel="stylesheet" href="/chatbot/style.css" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Chatbot widget markup -->
+    <section class="chat-window">
+      <button class="close">x close</button>
+      <div class="chat">
+        <div class="model">
+          <p>Hi, how can I help you?</p>
+        </div>
+      </div>
+      <div class="input-area">
+        <input placeholder="Ask me anything..." type="text" />
+        <button aria-label="Send">Send</button>
+      </div>
+    </section>
+
+    <div class="chat-button" aria-label="Open chat">💬</div>
+
+    <!-- Chatbot script (processed by Vite) -->
+    <script type="module">
+      import("../src/chatbot/main.ts");
+    </script>
   </body>
 </html>

@@ -46,24 +46,7 @@ export const MapSection = () => {
   return (
     <section className="py-20 md:py-28 bg-gradient-to-br from-background via-travel-ocean/5 to-background overflow-hidden">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12 md:mb-16 space-y-4">
-          <div className="inline-block">
-            <Badge className="bg-gradient-to-r from-travel-coral to-travel-sunset text-white px-4 py-2 text-sm font-semibold">
-              <Globe className="h-3 w-3 mr-2 inline" />
-              Global Coverage
-            </Badge>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">
-            Explore Our
-            <span className="block bg-gradient-to-r from-travel-coral via-travel-sky to-travel-ocean bg-clip-text text-transparent mt-2">
-              Worldwide Network
-            </span>
-          </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Discover destinations across all continents with our AI-powered travel assistant
-          </p>
-        </div>
+        {/* Header removed as requested */}
 
         {/* Continent Filter */}
         <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">

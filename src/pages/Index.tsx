@@ -13,8 +13,6 @@ import { SearchBar } from "@/components/SearchBar";
 import { OffersSection } from "@/components/OffersSection";
 import { PackagesSection } from "@/components/PackagesSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
-import { TrendingSection } from "@/components/TrendingSection";
-import { MapSection } from "@/components/MapSection";
 import { GoogleMapComponent } from "@/components/GoogleMapComponent";
 import { useGSAPAnimation } from "@/hooks/use-gsap-animation";
 import { useState, useEffect } from "react";
@@ -440,8 +438,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Trending Section - NEW */}
-      <TrendingSection />
+      {/* Trending Section removed as requested */}
 
       {/* Offers Section - NEW */}
       <OffersSection />
@@ -657,9 +654,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Interactive Map Section */}
-      <MapSection />
 
       {/* Google Maps Section */}
       <GoogleMapComponent />
