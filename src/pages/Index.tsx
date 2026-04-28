@@ -16,7 +16,7 @@ import { ReviewsSection } from "@/components/ReviewsSection";
 import { GoogleMapComponent } from "@/components/GoogleMapComponent";
 import { useGSAPAnimation } from "@/hooks/use-gsap-animation";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import londonImg from "@/assets/destinations/london.jpg";
 import parisImg from "@/assets/destinations/paris.jpg";
@@ -256,18 +256,18 @@ const Index = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-5">
-            <a href="#features" className="text-sm text-foreground/80 hover:text-travel-sky transition-colors font-medium relative group">
+            <Link to="/features" className="text-sm text-foreground/80 hover:text-travel-sky transition-colors font-medium relative group">
               <span>Features</span>
               <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-travel-sky transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="#destinations" className="text-sm text-foreground/80 hover:text-travel-ocean transition-colors font-medium relative group">
+            </Link>
+            <Link to="/destinations" className="text-sm text-foreground/80 hover:text-travel-ocean transition-colors font-medium relative group">
               <span>Destinations</span>
               <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-travel-ocean transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="#packages" className="text-sm text-foreground/80 hover:text-travel-coral transition-colors font-medium relative group">
+            </Link>
+            <Link to="/packages" className="text-sm text-foreground/80 hover:text-travel-coral transition-colors font-medium relative group">
               <span>Packages</span>
               <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-travel-coral transition-all duration-300 group-hover:w-full"></span>
-            </a>
+            </Link>
             
             <div className="h-5 w-px bg-border/50"></div>
             

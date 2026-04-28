@@ -50,34 +50,10 @@
       name="twitter:image"
       content="https://lovable.dev/opengraph-image-p98pqg.png"
     />
-
-    <!-- Chatbot styles (localized) -->
-    <link rel="stylesheet" href="/chatbot/style.css" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-
-    <!-- Chatbot widget markup -->
-    <section class="chat-window">
-      <button class="close">x close</button>
-      <div class="chat">
-        <div class="model">
-          <p>Hi, how can I help you?</p>
-        </div>
-      </div>
-      <div class="input-area">
-        <input placeholder="Ask me anything..." type="text" />
-        <button aria-label="Send">Send</button>
-      </div>
-    </section>
-
-    <div class="chat-button" aria-label="Open chat">💬</div>
-
-    <!-- Chatbot script (processed by Vite) -->
-    <script type="module">
-      import("../src/chatbot/main.ts");
-    </script>
   </body>
 </html>

@@ -5,6 +5,22 @@ import { X, Send, Plane, MapPin, Calendar, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { generateContent } from "@/lib/gemini";
+import {
+  extractTripDetails,
+  generateFollowUpQuestions,
+  generateItinerary,
+  generateBookingGuidance,
+  suggestDestinations,
+  TripContext
+} from "@/lib/travelPlanner";
+import {
+  initializeConversationState,
+  updateConversationState,
+  isReadyForPlanning,
+  isReadyForBooking,
+  ConversationState,
+  determineNextStage
+} from "@/lib/conversationState";
 
 interface Message {
   id?: string;
@@ -23,12 +39,17 @@ export const ChatInterface = ({ onClose, initialDestination }: ChatInterfaceProp
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [sessionId] = useState(() => crypto.randomUUID());
+  const [conversationState, setConversationState] = useState<ConversationState | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize conversation
   useEffect(() => {
     const initConversation = async () => {
-      // Create a new conversation
+      // Initialize conversation state
+      const initialState = initializeConversationState(initialDestination);
+      setConversationState(initialState);
+
+      // Create a new conversation in database
       const { data: user } = await supabase.auth.getUser();
       
       const { data: conversation, error } = await supabase
@@ -43,10 +64,26 @@ export const ChatInterface = ({ onClose, initialDestination }: ChatInterfaceProp
       if (conversation && !error) {
         setConversationId(conversation.id);
         
-        // Add initial greeting
-        const greetingContent = initialDestination 
-          ? `Hi! I'm Trippy, your travel buddy! I see you're interested in ${initialDestination}! That's an amazing choice. ${getDestinationInfo(initialDestination)} What would you like to know about your trip?`
-          : "Hi! I'm Trippy, your travel buddy! Where would you like to go, and when are you thinking of traveling?";
+        // Generate initial greeting based on state
+        let greetingContent: string;
+        
+        if (initialDestination) {
+          greetingContent = `Hi! I'm Trippy, your AI travel buddy! 🌍 I see you're interested in ${initialDestination}—great choice! 
+
+To create the perfect itinerary for you, I'll need a few quick details:
+• How many days are you planning to spend there?
+• What's your budget range?
+• Are you traveling solo, with family, or friends?
+• What interests you most? (nature, food, culture, adventure, history, nightlife?)
+
+Let's plan something amazing! ✈️`;
+        } else {
+          greetingContent = `👋 Hey! I'm Trippy, your AI travel buddy! I'm here to help you plan an incredible trip from start to finish.
+
+Whether you know exactly where you want to go or need recommendations, I've got you covered. Let's start with the essentials:
+
+**Where would you like to travel?** Tell me your destination (or describe what kind of trip appeals to you), and we'll go from there! 🗺️`;
+        }
         
         const { data: savedMessage } = await supabase
           .from('messages')
@@ -72,15 +109,156 @@ export const ChatInterface = ({ onClose, initialDestination }: ChatInterfaceProp
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const getDestinationInfo = (destination: string): string => {
-    const info: Record<string, string> = {
-      'Paris': "The City of Light is perfect for romance, art lovers, and food enthusiasts. The Eiffel Tower, Louvre, and charming cafés await you!",
-      'Tokyo': "A fascinating blend of ancient traditions and cutting-edge technology. From serene temples to neon-lit streets, Tokyo has it all!",
-      'Bali': "The Island of Gods offers stunning rice terraces, beautiful temples, and incredible beaches. Perfect for relaxation and adventure!"
-    };
-    return info[destination] || "Let me help you plan an incredible adventure there!";
+
+  /**
+   * Generates AI response based on conversation state and user input.
+   */
+  const generateAIResponse = async (userMessage: string): Promise<string> => {
+    if (!conversationState) return "";
+
+    try {
+      // Step 1: Extract trip details from user message
+      const { extractedContext, missingFields } = await extractTripDetails(
+        userMessage,
+        conversationState.tripContext
+      );
+
+      // Step 2: Update conversation state
+      const newState = updateConversationState(conversationState, extractedContext, missingFields);
+      setConversationState(newState);
+
+      // Step 3: Decide response based on conversation stage
+      let response = "";
+
+      if (isReadyForPlanning(newState) && !newState.itinerary) {
+        // Generate full itinerary
+        response = await generateItinerary(newState.tripContext);
+        setConversationState(prev => prev ? { ...prev, itinerary: response, stage: "itinerary_ready" } : null);
+      } else if (isReadyForBooking(newState)) {
+        // User is ready to book - provide booking guidance
+        response = await generateBookingGuidance(newState.tripContext, newState.itinerary || "");
+        setConversationState(prev => prev ? { ...prev, stage: "booking_phase" } : null);
+      } else if (missingFields.length > 0) {
+        // Still missing details - ask smart follow-up questions
+        const contextSummary = buildTripContextSummary(newState.tripContext);
+        
+        response = `Got it! ${contextSummary}\n\n`;
+        
+        const followUpQuestions = await generateFollowUpQuestions(newState.tripContext, missingFields);
+        response += followUpQuestions;
+      } else if (newState.itinerary) {
+        // Itinerary exists, respond to user's question about it
+        const contextualResponse = await generateContextualResponse(
+          userMessage,
+          newState.tripContext,
+          newState.itinerary
+        );
+        response = contextualResponse;
+      } else {
+        // Generic travel guidance
+        response = await generateGenericGuidance(userMessage, newState.tripContext);
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Error generating AI response:", error);
+      return getSmartFallback(conversationState);
+    }
   };
 
+  /**
+   * Builds a summary of collected trip context.
+   */
+  const buildTripContextSummary = (context: TripContext): string => {
+    const parts = [];
+    if (context.destination) parts.push(`📍 **${context.destination}**`);
+    if (context.duration?.days) parts.push(`📅 ${context.duration.days} days`);
+    if (context.budget?.category) parts.push(`💰 ${context.budget.category} budget`);
+    if (context.travelType) parts.push(`👥 ${context.travelType}`);
+    if (context.interests?.length) parts.push(`❤️ ${context.interests.join(", ")}`);
+    
+    return parts.length > 0 ? parts.join(" • ") : "Let me understand your preferences better!";
+  };
+
+  /**
+   * Generates contextual response when itinerary already exists.
+   */
+  const generateContextualResponse = async (
+    userMessage: string,
+    context: TripContext,
+    itinerary: string
+  ): Promise<string> => {
+    const responsePrompt = `The user is discussing their itinerary for ${context.destination}. 
+User message: "${userMessage}"
+
+Itinerary excerpt:
+${itinerary.substring(0, 800)}
+
+Respond briefly (2-3 sentences) addressing their message. If they want to modify, ask what specifically to adjust.`;
+
+    try {
+      return await generateContent(responsePrompt);
+    } catch {
+      return "Tell me what you'd like to adjust in your itinerary!";
+    }
+  };
+
+  /**
+   * Generates generic travel guidance when details are partial.
+   */
+  const generateGenericGuidance = async (
+    userMessage: string,
+    context: TripContext
+  ): Promise<string> => {
+    const guidancePrompt = `You are Trippy, a helpful travel assistant. The user is asking:
+"${userMessage}"
+
+Known about their trip:
+${JSON.stringify(context, null, 2)}
+
+Provide a helpful, brief response (2-3 sentences) that advances trip planning. Ask relevant follow-up questions.`;
+
+    try {
+      return await generateContent(guidancePrompt);
+    } catch {
+      return `That's a great question! Tell me more about what you're looking for, and I'll provide specific recommendations! 🌟`;
+    }
+  };
+
+  /**
+   * Smart fallback message based on conversation state.
+   */
+  const getSmartFallback = (state: ConversationState | null): string => {
+    if (!state) return `I'm experiencing a moment of inspiration lag! 😅 Try again in a moment, or tell me: Where do you want to travel?`;
+
+    const fallbacks: Record<string, string[]> = {
+      greeting: [
+        "Where would you love to travel? 🌍",
+        "Tell me your dream destination! ✈️",
+        "What kind of trip are you dreaming of?"
+      ],
+      collecting_details: [
+        `Great! So ${state.tripContext.destination || "your destination"} is locked in! What about budget and duration?`,
+        "Perfect! What's your approximate budget for this adventure?",
+        "Awesome choice! How many days are you planning?"
+      ],
+      ready_for_planning: [
+        "All set! Let me craft your perfect itinerary... 🗺️",
+        "I have everything I need. Creating your custom itinerary now! ✨"
+      ],
+      itinerary_ready: [
+        "Your itinerary is ready! Would you like to adjust anything, or should we move to booking? 🎉",
+        "Love the plan? Or would you like to tweak something? 💡"
+      ],
+      booking_phase: [
+        "Ready to start booking? I'll guide you through each step! 🚀",
+        "Let's make this trip happen! Here's your booking roadmap:"
+      ]
+    };
+
+    const relevant = fallbacks[state.stage] || fallbacks.greeting;
+    return relevant[Math.floor(Math.random() * relevant.length)];
+  };
   const handleSend = async () => {
     if (!input.trim() || !conversationId) return;
 
@@ -102,24 +280,8 @@ export const ChatInterface = ({ onClose, initialDestination }: ChatInterfaceProp
       });
 
     try {
-      // Create context from previous messages
-      const conversationHistory = messages
-        .slice(-5) // Last 5 messages for context
-        .map(m => `${m.role === 'user' ? 'User' : 'Trippy'}: ${m.content}`)
-        .join('\n');
-
-      // Generate AI response using Gemini
-      const prompt = `You are Trippy, an enthusiastic and helpful AI travel assistant. You help users plan their perfect trips with personalized recommendations.
-
-Previous conversation:
-${conversationHistory}
-
-User: ${userContent}
-
-Respond in a friendly, concise way (2-3 sentences max). Be enthusiastic about travel. Ask follow-up questions to help plan their trip better. Include specific destination suggestions, activities, or practical travel tips when relevant.`;
-
-      const aiContent = await generateContent(prompt);
-      
+      // Use new AI response generation with conversation state
+      const aiContent = await generateAIResponse(userContent);
       // Save AI message to database
       const { data: savedAiMessage } = await supabase
         .from('messages')
@@ -140,16 +302,7 @@ Respond in a friendly, concise way (2-3 sentences max). Be enthusiastic about tr
       console.error('Error generating AI response:', error);
       
       // Fallback responses if API fails
-      const fallbackResponses = [
-        `That sounds amazing! Based on what you've told me, I can help plan the perfect itinerary. What's your budget like for this trip?`,
-        `Great choice! I know some incredible spots there. How many days are you planning to stay?`,
-        `Wonderful! Would you like me to include popular attractions, hidden local gems, or a mix of both?`,
-        `Perfect! I'll craft a personalized itinerary just for you. Are you traveling solo, with family, or friends?`,
-        `I love your enthusiasm! Let me suggest some must-see places and experiences. Do you prefer cultural sites, nature, or nightlife?`
-      ];
-      
-      const aiContent = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-      
+      const aiContent = getSmartFallback(conversationState);
       // Save fallback message to database
       const { data: savedAiMessage } = await supabase
         .from('messages')
@@ -170,16 +323,16 @@ Respond in a friendly, concise way (2-3 sentences max). Be enthusiastic about tr
   };
 
   const quickActions = [
-    { icon: MapPin, label: "Popular Destinations", action: "Show me popular destinations" },
-    { icon: Calendar, label: "Plan Weekend Trip", action: "Help me plan a weekend getaway" },
-    { icon: Plane, label: "International Travel", action: "I want to travel internationally" }
+    { icon: MapPin, label: "Suggest Destinations", action: "Can you suggest some destinations for adventure lovers with a modest budget?" },
+    { icon: Calendar, label: "Plan Weekend Trip", action: "I want to plan a 3-day weekend trip. I love nature and good food. Budget is moderate." },
+    { icon: Plane, label: "Get Full Itinerary", action: "Paris, 5 days, moderate budget, solo travel, interested in culture and food" }
   ];
 
   const handleQuickAction = (action: string) => {
     setInput(action);
     // Small delay to show the input before sending
     setTimeout(() => {
-      handleSend();
+      if (!isLoading) handleSend();
     }, 100);
   };
 
